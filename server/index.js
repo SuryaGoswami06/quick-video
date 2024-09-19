@@ -31,7 +31,8 @@ io.on('connection', (socket) => {
                     socket.emit('ice', candidate);
                 });
                 rooms[roomId].candidates = [];
-                console.log(rooms)
+            }else{
+                socket.emit('sorry','already two people were joined so make different room')
             }
         } else {
             rooms[roomId] = {
@@ -41,7 +42,6 @@ io.on('connection', (socket) => {
             rooms[roomId].socketIds.push(socket.id)
             socket.join(roomId);
         }
-        console.log(socket.id)
     });
 
     socket.on('offer', (offer, roomId) => {
@@ -61,6 +61,18 @@ io.on('connection', (socket) => {
             }
         }
     });
+
+    socket.on('disconnect',()=>{
+        for(const roomid in rooms){
+            if(rooms[roomid]['socketIds'].includes(socket.id)){
+                rooms[roomid]['socketIds'] = rooms[roomid]['socketIds'].filter(id=>id!==socket.id)
+            }
+            if(rooms[roomid]['socketIds'].length==0){
+                delete rooms[roomid]
+            }
+        }
+        console.log(rooms)
+    })
 });
 
 app.get('/', (req, res) => {
