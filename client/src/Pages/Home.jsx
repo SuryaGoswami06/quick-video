@@ -5,28 +5,33 @@ import meeting from '/video-call.svg'
 import keyboard from '/keyboard.svg'
 import Input from '../components/Input'
 import { useNavigate } from 'react-router-dom'
-import socket from '../utils/socket.js'
 import randomRoomId from '../utils/generateRoomId.js'
-import {instanceOfPeer} from '../utils/webrtc.js'
+import {useDispatch} from 'react-redux'
+import { setInitiator } from '../store/rtcSlice.js'
+import socket from '../utils/socket.js'
 
 function Home() {
     const [roomId,setRoomId] = useState('')
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const handleRoomIdChange = (e)=>{
         setRoomId(e.target.value)
     }
     
     const handleJoinRoom = ()=>{
-        
+        if(roomId.trim() !==''){
+          socket.emit('join',roomId)
+          dispatch(setInitiator(false))
+          navigate(`/room/${roomId}`)
+        }
     }
 
     const handleCreateRoom =async ()=>{
       const roomId = randomRoomId();
-      const peerConnection = await instanceOfPeer();
-      const offer = await peerConnection.createOffer()
-      await peerConnection.setLocalDescription(offer)
-      socket.emit('offer',offer)
+      socket.emit('join',roomId)
+      dispatch(setInitiator(true))
+      navigate(`/room/${roomId}`)
     }
 
   return (
