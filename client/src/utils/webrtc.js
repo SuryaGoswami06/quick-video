@@ -19,7 +19,6 @@ export default class Peer {
             throw err;
         }
     }
-
     async getPeerConnection() {
         const stream = await this.getUserMedia();
         const peerConnection = new RTCPeerConnection(this.serverConstraints);
